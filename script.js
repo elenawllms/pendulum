@@ -86,6 +86,11 @@ class Pendulum {
     getAngle() {
         return this.angle;
     }
+
+    toString() {
+        return ("Pendulum with damping: " + this.c.toString() + "; lamdba: " + this.l.toString() + 
+            "; angle: " + this.angle.toString() + "; and velocity: " + this.vel.toString());
+    }
 }
 
 function drawAxes(ctx, stateSpace) {
@@ -165,12 +170,22 @@ function coordToPercent(coord) {
 }
 
 function writeState(ctx, stateSpace, angle, velocity) {
-    ctx.beginPath();
-    newState = stateSpace.point(coordToPercent(angle), coordToPercent(velocity));
-    line.push(newState);
-    ctx.arc(...newState, 3, 0, 2 * Math.PI);
-    ctx.fillStyle = 'red';
-    ctx.fill();
+
+    const anglePercent = coordToPercent(angle);
+    const velPercent = coordToPercent(velocity);
+
+    
+    if (anglePercent < 0 || anglePercent > 100 || velPercent < 0 || velPercent > 100) {
+        line.push("JUMP");
+    } else {
+        newState = stateSpace.point(anglePercent, velPercent);
+        line.push(newState);
+        ctx.beginPath();
+        ctx.arc(...newState, 3, 0, 2 * Math.PI);
+        ctx.fillStyle = 'red';
+        ctx.fill();
+    }
+    
 }
 
 function update(c, ctx, pendulum) {
@@ -180,6 +195,31 @@ function update(c, ctx, pendulum) {
     writePendulum(ctx, pendulum.getAngle());
     pendulum.update();
     writeState(ctx, stateSpace, pendulum.getAngle(), pendulum.getVelocity());
+
+    
+}
+
+function getPhysicalProperties() {
+    damping = parseFloat(document.getElementById("damping").value);
+    length = parseFloat(document.getElementById("length").value);
+    return [damping, length];
+}
+
+function getInitStateFromInput() {
+    initAngle = parseFloat(document.getElementById("initAngle").value);
+    initVel = parseFloat(document.getElementById("initVel").value);
+    return [initAngle, initVel];
+}
+
+var pendInterval = null;
+
+function newPendulum(c, ctx) {
+    clearInterval(pendInterval);
+    line = [];
+    [damping, length] = getPhysicalProperties();
+    [initAngle, initVel] = getInitStateFromInput();
+    pendulum = new Pendulum(damping, length, initAngle, initVel);
+    pendInterval = setInterval(function() {update(c, ctx, pendulum)}, 25);
 }
 
 $(document).ready( function() {
@@ -187,6 +227,8 @@ $(document).ready( function() {
     c.width = 640;
     c.height = 360;
     const ctx = c.getContext('2d');
-    pendulum = new Pendulum(0.1, 10, Math.PI-1, 2);
-    setInterval(function() {update(c, ctx, pendulum)}, 25);
+    var pendulum = new Pendulum(0.5, 5, 2, 2);
+    pendInterval = setInterval(function() {update(c, ctx, pendulum)}, 25);
+    // setTimeout(function() {newPendulum(c, ctx, pendInterval)}, 2000);
+    c.addEventListener("mousedown", function() {newPendulum(c, ctx);});
 });
