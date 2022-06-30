@@ -1,3 +1,4 @@
+const DELTA = 0.01;
 
 function createScale(initialVal, finalVal) {
     return (percent) => (initialVal + (percent / 100 ) * (finalVal - initialVal));
@@ -55,6 +56,31 @@ class Frame {
     }
 }
 
+class Pendulum {
+    constructor(dampingConstant, length, initialAngle, initialVelocity) {
+        gravity = 9.8;
+        self.c = dampingConstant;
+        self.l = gravity/length;
+        self.angle = initialAngle;
+        self.vel = initialVelocity;
+        self.acc = 0;
+    }
+
+    update() {
+        self.acc = -1 * self.l * Math.sin(self.angle) - self.c * self.vel;
+        self.vel += (DELTA * self.acc);
+        self.angle += (DELTA * self.vel);
+    }
+
+    getVelocity() {
+        return self.vel;
+    }
+
+    getAngle() {
+        return self.angle;
+    }
+}
+
 function drawAxes(ctx, stateSpace) {
     stateSpace.line(ctx, 0, 0, 0, 100);
     stateSpace.line(ctx, 100, 0, 0, 0);
@@ -66,7 +92,6 @@ function drawTicks(ctx, stateSpace) {
     
     unitSize = Math.round(100 / 7.5);
     majorTicks = range(50 - 3*unitSize, 100, unitSize);
-    console.log(majorTicks);
     ctx.font = "10px Helvetica";
 
     for (var i = 0; i < majorTicks.length; i++) {
@@ -93,10 +118,33 @@ function setUpStateSpace(ctx) {
 }
 
 
+function writePendulum(ctx, angle) {
+    pendulumSpace = new Frame(380, 580, 80, 280);
+    xCoord = Math.round(50 + 50 * Math.sin(angle));
+    yCoord = Math.round(50 + 50 * Math.cos(angle));
+    pendulumSpace.line(ctx, 50, xCoord, 50, yCoord, 3);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(...pendulumSpace.point(xCoord, yCoord), 15, 0, 2 * Math.PI);
+    ctx.fillStyle = '#333';
+    ctx.fill();
+
+}
+
+let angle = 0;
+
+function update(c, ctx) {
+    ctx.clearRect(0, 0, c.width, c.height);
+    setUpStateSpace(ctx);
+    writePendulum(ctx, angle);
+    angle += 0.05;
+}
+
 $(document).ready( function() {
     const c = document.getElementById("myCanvas");
     c.width = 640;
     c.height = 360;
     const ctx = c.getContext('2d');
-    setUpStateSpace(ctx);
+    // writePendulum(ctx, 0);
+    setInterval(function() {update(c, ctx)}, 25);
 });
