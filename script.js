@@ -1,6 +1,8 @@
 const DELTA = 0.1;
-const COORD_LIMIT = 3.5;
+const COORD_LIMIT = 3.17;
 var line = [];
+const GRAPH_LOWER = 50;
+const GRAPH_UPPER = 310;
 
 function createScale(initialVal, finalVal) {
     return (percent) => (initialVal + (percent / 100 ) * (finalVal - initialVal));
@@ -72,8 +74,11 @@ class Pendulum {
         this.acc = -1 * this.l * Math.sin(this.angle) - this.c * this.vel;
         this.vel += (DELTA * this.acc);
         this.angle += (DELTA * this.vel);
-        if (this.angle < -1 * Math.PI || this.angle > Math.PI) {
-            this.angle = ((this.angle + Math.PI) % (Math.PI * 2)) - Math.PI;
+        if (this.angle < -1 * Math.PI) {
+            this.angle += (2 * Math.PI);
+            line.push("JUMP");
+        } else if (this.angle > Math.PI) {
+            this.angle -= (2 * Math.PI);
             line.push("JUMP");
         }
         
@@ -112,8 +117,8 @@ function drawTicks(ctx, stateSpace) {
         stateSpace.line(ctx, 103, -3, val, val, 2);
         ctx.fillText(i-3, ...stateSpace.point(val-1, -5));
         ctx.fillText(i-3, ...stateSpace.point(val-1, 108));
-        ctx.fillText(i-3, ...stateSpace.point(-8, val+2));
-        ctx.fillText(i-3, ...stateSpace.point(105, val+2));
+        ctx.fillText(3-i, ...stateSpace.point(-8, val+2));
+        ctx.fillText(3-i, ...stateSpace.point(105, val+2));
     }
     
 }
@@ -141,7 +146,7 @@ function drawLine(ctx) {
 
 
 function setUpStateSpace(ctx) {
-    stateSpace = new Frame(50, 310, 50, 310);
+    stateSpace = new Frame(GRAPH_LOWER, GRAPH_UPPER, GRAPH_LOWER, GRAPH_UPPER);
     ctx.strokeStyle = '#333';
     drawTicks(ctx, stateSpace);
     ctx.fillStyle = '#eee';
@@ -165,14 +170,17 @@ function writePendulum(ctx, angle) {
 
 }
 
-function coordToPercent(coord) {
+function xToPercent(coord) {
     return (((coord * 50 / COORD_LIMIT) + 1) + 50);
+}
+function yToPercent(coord) {
+    return (50 - ((coord * 50 / COORD_LIMIT) + 1));
 }
 
 function writeState(ctx, stateSpace, angle, velocity) {
 
-    const anglePercent = coordToPercent(angle);
-    const velPercent = coordToPercent(velocity);
+    const anglePercent = xToPercent(angle);
+    const velPercent = yToPercent(velocity);
 
     
     if (anglePercent < 0 || anglePercent > 100 || velPercent < 0 || velPercent > 100) {
@@ -222,6 +230,42 @@ function newPendulum(c, ctx) {
     pendInterval = setInterval(function() {update(c, ctx, pendulum)}, 25);
 }
 
+function getGraphPercentX(coord) {
+    if (coord <= GRAPH_LOWER || coord >= GRAPH_UPPER) {
+        return 0;
+    } else {
+        return ((coord - GRAPH_LOWER) * 100 / (GRAPH_UPPER - GRAPH_LOWER))
+    }
+}
+
+function getGraphPercentY(coord) {
+    if (coord <= GRAPH_LOWER || coord >= GRAPH_UPPER) {
+        return 0;
+    } else {
+        return (100 - ((coord - GRAPH_LOWER) * 100 / (GRAPH_UPPER - GRAPH_LOWER)));
+    }
+}
+
+function clickPendulum(e, c, ctx) {
+    let rect = c.getBoundingClientRect();
+    let x = e.clientX - rect.left;
+    let y = e.clientY - rect.top;
+    
+    [xPercent, yPercent] = [getGraphPercentX(x), getGraphPercentY(y)];
+    if (!xPercent || !yPercent) {
+        return;
+    }
+    coordScale = createScale(-1 * COORD_LIMIT, COORD_LIMIT);
+
+    [initAngle, initVel] = [coordScale(xPercent), coordScale(yPercent)];
+
+    document.getElementById("initAngle").value = initAngle;
+    document.getElementById("initVel").value = initVel;
+
+    newPendulum(c, ctx);
+
+}
+
 $(document).ready( function() {
     const c = document.getElementById("myCanvas");
     c.width = 640;
@@ -230,5 +274,5 @@ $(document).ready( function() {
     var pendulum = new Pendulum(0.5, 5, 2, 2);
     pendInterval = setInterval(function() {update(c, ctx, pendulum)}, 25);
     // setTimeout(function() {newPendulum(c, ctx, pendInterval)}, 2000);
-    c.addEventListener("mousedown", function() {newPendulum(c, ctx);});
+    c.addEventListener("mousedown", function(e) {clickPendulum(e, c, ctx);});
 });
