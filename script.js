@@ -1,4 +1,6 @@
-const DELTA = 0.01;
+const DELTA = 0.1;
+const COORD_LIMIT = 3.5;
+var line = [];
 
 function createScale(initialVal, finalVal) {
     return (percent) => (initialVal + (percent / 100 ) * (finalVal - initialVal));
@@ -58,26 +60,31 @@ class Frame {
 
 class Pendulum {
     constructor(dampingConstant, length, initialAngle, initialVelocity) {
-        gravity = 9.8;
-        self.c = dampingConstant;
-        self.l = gravity/length;
-        self.angle = initialAngle;
-        self.vel = initialVelocity;
-        self.acc = 0;
+        var gravity = 9.8;
+        this.c = dampingConstant;
+        this.l = gravity/length;
+        this.angle = initialAngle;
+        this.vel = initialVelocity;
+        this.acc = 0;
     }
 
     update() {
-        self.acc = -1 * self.l * Math.sin(self.angle) - self.c * self.vel;
-        self.vel += (DELTA * self.acc);
-        self.angle += (DELTA * self.vel);
+        this.acc = -1 * this.l * Math.sin(this.angle) - this.c * this.vel;
+        this.vel += (DELTA * this.acc);
+        this.angle += (DELTA * this.vel);
+        if (this.angle < -1 * Math.PI || this.angle > Math.PI) {
+            this.angle = ((this.angle + Math.PI) % (Math.PI * 2)) - Math.PI;
+            line.push("JUMP");
+        }
+        
     }
 
     getVelocity() {
-        return self.vel;
+        return this.vel;
     }
 
     getAngle() {
-        return self.angle;
+        return this.angle;
     }
 }
 
@@ -90,7 +97,7 @@ function drawAxes(ctx, stateSpace) {
 
 function drawTicks(ctx, stateSpace) {
     
-    unitSize = Math.round(100 / 7.5);
+    unitSize = Math.round(100 / (COORD_LIMIT * 2));
     majorTicks = range(50 - 3*unitSize, 100, unitSize);
     ctx.font = "10px Helvetica";
 
@@ -106,6 +113,27 @@ function drawTicks(ctx, stateSpace) {
     
 }
 
+function drawLine(ctx) {
+    if (!line.length) {
+        return;
+    }
+    ctx.lineWidth = 0.5;
+    ctx.beginPath();
+    ctx.strokeStyle = '#000';
+    ctx.moveTo(...line[0]);
+    for (i=1; i < line.length; i++) {
+        nextCoord = line[i]
+        if (nextCoord == "JUMP") {
+            ctx.stroke();
+            ctx.beginPath();
+            continue;
+        }
+        ctx.lineTo(...nextCoord);
+    }
+    ctx.stroke();
+
+}
+
 
 function setUpStateSpace(ctx) {
     stateSpace = new Frame(50, 310, 50, 310);
@@ -114,7 +142,8 @@ function setUpStateSpace(ctx) {
     ctx.fillStyle = '#eee';
     ctx.fillRect(...stateSpace.point(0, 0), ...stateSpace.offsetPoint(100, 100));
     drawAxes(ctx, stateSpace);
-
+    drawLine(ctx);
+    return stateSpace;
 }
 
 
@@ -131,13 +160,26 @@ function writePendulum(ctx, angle) {
 
 }
 
-let angle = 0;
+function coordToPercent(coord) {
+    return (((coord * 50 / COORD_LIMIT) + 1) + 50);
+}
 
-function update(c, ctx) {
+function writeState(ctx, stateSpace, angle, velocity) {
+    ctx.beginPath();
+    newState = stateSpace.point(coordToPercent(angle), coordToPercent(velocity));
+    line.push(newState);
+    ctx.arc(...newState, 3, 0, 2 * Math.PI);
+    ctx.fillStyle = 'red';
+    ctx.fill();
+}
+
+function update(c, ctx, pendulum) {
     ctx.clearRect(0, 0, c.width, c.height);
-    setUpStateSpace(ctx);
-    writePendulum(ctx, angle);
-    angle += 0.05;
+    ctx.fillStyle = '#000';
+    stateSpace = setUpStateSpace(ctx);
+    writePendulum(ctx, pendulum.getAngle());
+    pendulum.update();
+    writeState(ctx, stateSpace, pendulum.getAngle(), pendulum.getVelocity());
 }
 
 $(document).ready( function() {
@@ -145,6 +187,6 @@ $(document).ready( function() {
     c.width = 640;
     c.height = 360;
     const ctx = c.getContext('2d');
-    // writePendulum(ctx, 0);
-    setInterval(function() {update(c, ctx)}, 25);
+    pendulum = new Pendulum(0.1, 10, Math.PI-1, 2);
+    setInterval(function() {update(c, ctx, pendulum)}, 25);
 });
