@@ -64,14 +64,19 @@ function drawAxes(ctx, stateSpace) {
 
 function drawTicks(ctx, stateSpace) {
     
-    unitSize = Math.round(100 / 7);
+    unitSize = Math.round(100 / 7.5);
     majorTicks = range(50 - 3*unitSize, 100, unitSize);
     console.log(majorTicks);
+    ctx.font = "10px Helvetica";
 
     for (var i = 0; i < majorTicks.length; i++) {
         val = majorTicks[i];
         stateSpace.line(ctx, val, val, 103, -3, 2);
         stateSpace.line(ctx, 103, -3, val, val, 2);
+        ctx.fillText(i-3, ...stateSpace.point(val-1, -5));
+        ctx.fillText(i-3, ...stateSpace.point(val-1, 108));
+        ctx.fillText(i-3, ...stateSpace.point(-8, val+2));
+        ctx.fillText(i-3, ...stateSpace.point(105, val+2));
     }
     
 }
@@ -79,7 +84,7 @@ function drawTicks(ctx, stateSpace) {
 
 function setUpStateSpace(ctx) {
     stateSpace = new Frame(50, 310, 50, 310);
-    ctx.strokeStyle = '#aaa';
+    ctx.strokeStyle = '#333';
     drawTicks(ctx, stateSpace);
     ctx.fillStyle = '#eee';
     ctx.fillRect(...stateSpace.point(0, 0), ...stateSpace.offsetPoint(100, 100));
