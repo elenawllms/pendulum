@@ -99,6 +99,7 @@ class Pendulum {
 }
 
 function drawAxes(ctx, stateSpace) {
+    ctx.strokeStyle = 'black';
     stateSpace.line(ctx, 0, 0, 0, 100);
     stateSpace.line(ctx, 100, 0, 0, 0);
     stateSpace.line(ctx, 100, 0, 100, 100);
@@ -122,12 +123,32 @@ function drawTicks(ctx, stateSpace) {
     }
     
 }
+function drawGridLines(ctx, stateSpace) {
+
+    const lineWidth = 0.5;
+    ctx.strokeStyle = "#aaa";
+    
+    unitSize = Math.round(100 / (COORD_LIMIT * 4));
+    majorTicks = range(50 - 6*unitSize, 100, unitSize);
+    ctx.font = "10px Helvetica";
+
+    for (var i = 0; i < majorTicks.length; i++) {
+        val = majorTicks[i];
+        stateSpace.line(ctx, val, val, 100, 0, lineWidth);
+        stateSpace.line(ctx, 100, 0, val, val, lineWidth);
+    }
+
+    ctx.strokeStyle = "#aaa";
+    stateSpace.line(ctx, 50, 50, 100, 0, 1);
+    stateSpace.line(ctx, 100, 0, 50, 50, 1);
+    
+}
 
 function drawLine(ctx) {
     if (!line.length) {
         return;
     }
-    ctx.lineWidth = 0.5;
+    ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.strokeStyle = '#000';
     ctx.moveTo(...line[0]);
@@ -149,8 +170,9 @@ function setUpStateSpace(ctx) {
     stateSpace = new Frame(GRAPH_LOWER, GRAPH_UPPER, GRAPH_LOWER, GRAPH_UPPER);
     ctx.strokeStyle = '#333';
     drawTicks(ctx, stateSpace);
-    ctx.fillStyle = '#eee';
+    ctx.fillStyle = '#f9f9f9';
     ctx.fillRect(...stateSpace.point(0, 0), ...stateSpace.offsetPoint(100, 100));
+    drawGridLines(ctx, stateSpace);
     drawAxes(ctx, stateSpace);
     drawLine(ctx);
     return stateSpace;
