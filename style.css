@@ -26,3 +26,21 @@ body {
     height: 360px;
     border: 1px solid #000000;
 }
+
+#controls {
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 30px;
+}
+/* 
+.control {
+    border: 1px solid black;
+} */
+
+.control>label {
+    display: block;
+}
+
+.control>input {
+    width: 200px;
+}
