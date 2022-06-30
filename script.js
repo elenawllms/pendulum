@@ -266,13 +266,17 @@ function clickPendulum(e, c, ctx) {
 
 }
 
+
+
 $(document).ready( function() {
     const c = document.getElementById("myCanvas");
     c.width = 640;
     c.height = 360;
     const ctx = c.getContext('2d');
-    var pendulum = new Pendulum(0.5, 5, 2, 2);
-    pendInterval = setInterval(function() {update(c, ctx, pendulum)}, 25);
+    const defaultPendulum = new Pendulum(0.5, 5, 2, 2);
+    pendInterval = setInterval(function() {update(c, ctx, defaultPendulum)}, 25);
     // setTimeout(function() {newPendulum(c, ctx, pendInterval)}, 2000);
     c.addEventListener("mousedown", function(e) {clickPendulum(e, c, ctx);});
+    refreshBtn = document.getElementById("refresh");
+    refreshBtn.addEventListener("click", function() {newPendulum(c, ctx);});
 });
