@@ -8,12 +8,14 @@
 
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@200&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Alegreya&display=swap" rel="stylesheet">
     </head>
     <body>
         <div id="content-wrapper"><div id="content">
-            <canvas id="myCanvas">
-            </canvas>
+            <!-- <h1>Pendulum</h1> -->
+            <div><p>Click the refresh button or anywhere on the state space to set the pendulum's state.</p></div>
+
+            <canvas id="myCanvas"></canvas>
             <div id="controls">
                 <div class="control">
                     <label for="damping">Damping</label>
@@ -23,6 +25,8 @@
                     <label for="length">Length</label>
                     <input type="range" id="length" name="length" min="5" max="10" step="0.1" value="5">
                 </div>
+                <div id="button-holder"><button class="button-28" id="refresh">Refresh</button></div>
+
                 <div class="control">
                     <label for="initAngle">Initial Angle</label>
                     <input type="range" id="initAngle" name="initAngle" min="-3.15" max="3.15" step="0.01" value="2">
@@ -31,8 +35,10 @@
                     <label for="initVel">Initial Velocity</label>
                     <input type="range" id="initVel" name="initVel" min="-3.15" max="3.15" step="0.01" value="2">
                 </div>
+                
             </div>
-            <div id="button-holder"><button id="refresh">refresh</button></div>
+            
+
         </div></div>
     </body>
 </html>

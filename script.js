@@ -110,7 +110,7 @@ function drawTicks(ctx, stateSpace) {
     
     unitSize = Math.round(100 / (COORD_LIMIT * 2));
     majorTicks = range(50 - 3*unitSize, 100, unitSize);
-    ctx.font = "10px Helvetica";
+    ctx.font = "13px Alegreya";
 
     for (var i = 0; i < majorTicks.length; i++) {
         val = majorTicks[i];
@@ -180,7 +180,7 @@ function setUpStateSpace(ctx) {
 
 
 function writePendulum(ctx, angle) {
-    pendulumSpace = new Frame(380, 580, 80, 280);
+    pendulumSpace = new Frame(400, 600, 80, 280);
     xCoord = Math.round(50 + 50 * Math.sin(angle));
     yCoord = Math.round(50 + 50 * Math.cos(angle));
     pendulumSpace.line(ctx, 50, xCoord, 50, yCoord, 3);
@@ -212,7 +212,7 @@ function writeState(ctx, stateSpace, angle, velocity) {
         line.push(newState);
         ctx.beginPath();
         ctx.arc(...newState, 3, 0, 2 * Math.PI);
-        ctx.fillStyle = 'red';
+        ctx.fillStyle = '#015CC8';
         ctx.fill();
     }
     
