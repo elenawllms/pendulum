@@ -281,7 +281,9 @@ function clickPendulum(e, c, ctx) {
     [initAngle, initVel] = [coordScale(xPercent), coordScale(yPercent)];
 
     document.getElementById("initAngle").value = initAngle;
+    document.getElementById("angle_out").value = initAngle.toFixed(2);
     document.getElementById("initVel").value = initVel;
+    document.getElementById("vel_out").value = initVel.toFixed(2);
 
     newPendulum(c, ctx);
 
