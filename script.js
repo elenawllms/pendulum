@@ -1,4 +1,4 @@
-const DELTA = 0.1;
+const DELTA = 0.03;
 const COORD_LIMIT = 3.17;
 var line = [];
 const GRAPH_LOWER = 50;
@@ -248,7 +248,7 @@ function newPendulum(c, ctx) {
     [damping, length] = getPhysicalProperties();
     [initAngle, initVel] = getInitStateFromInput();
     pendulum = new Pendulum(damping, length, initAngle, initVel);
-    pendInterval = setInterval(function() {update(c, ctx, pendulum)}, 25);
+    pendInterval = setInterval(function() {update(c, ctx, pendulum)}, 10);
 }
 
 function getGraphPercentX(coord) {
@@ -297,7 +297,7 @@ $(document).ready( function() {
     c.height = 600;
     const ctx = c.getContext('2d');
     const defaultPendulum = new Pendulum(0.5, 5, 2, 2);
-    pendInterval = setInterval(function() {update(c, ctx, defaultPendulum)}, 25);
+    pendInterval = setInterval(function() {update(c, ctx, defaultPendulum)}, 10);
     // setTimeout(function() {newPendulum(c, ctx, pendInterval)}, 2000);
     c.addEventListener("mousedown", function(e) {clickPendulum(e, c, ctx);});
     refreshBtn = document.getElementById("refresh");
